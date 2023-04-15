@@ -16,7 +16,7 @@ reps = 2
 sens_step=0
 run_id <<- makevalidname(as.character(Sys.time()))
 for(bogger in 5:6) {
-  for (n_trucks in 5:7) {
+  for (n_trucks in 5:6) {
     for (stope_access_const in 1:2) {
       sens_step=sens_step+1
       run_model(
