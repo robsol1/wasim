@@ -1,0 +1,37 @@
+"modelname","scenario","sens_step","run_number","varname","var_val"
+"orepass","initial suite",7,1,"drawpoint_max_stock","9999999"
+"orepass","initial suite",7,1,"drawpoint_access_limit","3"
+"orepass","initial suite",7,1,"stope_stock_max_stock","1000"
+"orepass","initial suite",7,1,"stope_stock_access_limit","1"
+"orepass","initial suite",7,1,"hoist_stock_max_stock","9999999"
+"orepass","initial suite",7,1,"hoist_stock_access_limit","1"
+"orepass","initial suite",7,1,"bogger_unit_capacity","7"
+"orepass","initial suite",7,1,"bogger_mttr","function () 
+max(1, rnorm(1, 3600, 360))"
+"orepass","initial suite",7,1,"bogger_mtbf","function () 
+max(1, rexp(1, rate = 1/(24 * 3600)))"
+"orepass","initial suite",7,1,"bogger_get_stocks_delay","function () 
+max(1, rnorm(1, 50, 5))"
+"orepass","initial suite",7,1,"cave_capacity","1000"
+"orepass","initial suite",7,1,"bogger_haul_loaded_delay","function () 
+max(1, rnorm(1, 90, 9))"
+"orepass","initial suite",7,1,"bogger_dump_stocks_delay","function () 
+max(1, rnorm(1, 20, 2))"
+"orepass","initial suite",7,1,"truck_capacity","70"
+"orepass","initial suite",7,1,"bogger_haul_empty_delay","function () 
+max(1, rnorm(1, 75, 7.5))"
+"orepass","initial suite",7,1,"truck_unit_capacity","70"
+"orepass","initial suite",7,1,"truck_mttr","function () 
+max(1, rnorm(1, 3600, 360))"
+"orepass","initial suite",7,1,"truck_mtbf","function () 
+max(1, rexp(1, rate = 1/(24 * 3600)))"
+"orepass","initial suite",7,1,"truck_get_stocks_delay","function () 
+max(1, rnorm(1, 180, 18))"
+"orepass","initial suite",7,1,"bogger_capacity","7"
+"orepass","initial suite",7,1,"truck_haul_loaded_delay","function () 
+max(1, rnorm(1, 1200, 120))"
+"orepass","initial suite",7,1,"truck_dump_stocks_delay","function () 
+max(1, rnorm(1, 40, 4))"
+"orepass","initial suite",7,1,"hoist_capacity","1000"
+"orepass","initial suite",7,1,"truck_haul_empty_delay","function () 
+max(1, rnorm(1, 1100, 110))"

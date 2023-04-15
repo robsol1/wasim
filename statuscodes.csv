@@ -1,0 +1,7 @@
+ID,value,tum,seq
+s_wait_res,1,op_delay,0_5
+s_wait_stock_access ,2,op_delay,0_4
+s_wait_downstream_stock,3,utilisation,0_3
+s_wait_upstream_stock,4,utilisation,0_3
+s_working,5,productive,0
+s_breakdown,6,Availability,3
