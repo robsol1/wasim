@@ -121,7 +121,7 @@ init_model <- function(model,
     item = '_activate_model',
     trj_step = 1,
     activity = '_activate_model',
-    var_txt = paste0("env <- simmer('", envname, "' , log_level = ", level, ")\n"),
+    var_txt = paste0("env <- simmer('", envname, "' , log_level = ", level, ")\nseed=thisseed\n"),
     # trj_txt = paste0("set.seed(", seed, ")\n"),
     # env_txt = paste0("env <- env %>% \n add_global('seed', ", seed, ")\n"),
     trj_txt="",
@@ -326,7 +326,8 @@ run_model <-
            runduration,
            reps = 1,
            thisseed = NULL,
-           loglevel = 0) {
+           loglevel = 0,
+           verbose=FALSE) {
     model_path <<- paste0(getwd(),"/",modelname,"/")
     scen_dir <<- paste0(getwd(),"/",modelname,"/",scenario_desc)
     rundir <<-paste0(scen_dir,'/',run_id)
@@ -346,7 +347,7 @@ run_model <-
       if (loglevel > 0)
         sink(file = paste0(path, 'code_', i, '.log.txt'))
       if (is.null(thisseed))
-        thisseed <- as.integer(runif(1, 1, 10000))
+        thisseed <<- as.integer(runif(1, 1, 10000))
       source(full_model_filename) #load model
       env <- env %>% run(runduration)
       print(i)
@@ -361,7 +362,8 @@ run_model <-
         df <- mod_df,
         resource = get_mon_resources(env),
         attributes = get_mon_attributes(env),
-        arrive = get_mon_arrivals(env, per_resource = FALSE)
+        arrive = get_mon_arrivals(env, per_resource = FALSE),
+        verbose
       )
       rm(env)
     }
@@ -369,6 +371,19 @@ run_model <-
 
 
 #get basic data 
+addid <- function(df,
+                  modelname,
+                  scenario_desc,
+                  run_number) {
+  ncols = ncol(df)
+  df$modelname = modelname
+  df$scenario = scenario_desc
+  df$sens_step = sens_step
+  df$run_number = run_number
+  df <- df %>% select((ncols + 1):(ncols + 4), all_of(1:ncols))
+  
+}
+
 protosave <-
   function(df,
            modelname,
@@ -377,12 +392,7 @@ protosave <-
            path,
            dfname) {
     if (nrow(df) > 0) {
-      ncols = ncol(df)
-      df$modelname = modelname
-      df$scenario = scenario_desc
-      df$sens_step=sens_step
-      df$run_number = run_number
-      df <- df %>% select((ncols + 1):(ncols + 4), all_of(1:ncols))
+      df <- addid(df,modelname,scenario_desc,run_number)
       write.csv(df,
                 paste0(
                   rundir,
@@ -406,13 +416,51 @@ save_results <- function(modelname,
                          df,
                          resource,
                          attributes,
-                         arrive) {
+                         arrive,
+                         verbose) {
   
   varlist <- get_mod_vars(df =df)
-  protosave(df=varlist, modelname=modelname, scenario_desc=scenario_desc, run_number=run_number,path=path,dfname='vars') 
-  protosave(df=resource, modelname=modelname, scenario_desc=scenario_desc, run_number=run_number,path=path,dfname='resource') 
-  protosave(df=attributes, modelname=modelname, scenario_desc=scenario_desc, run_number=run_number,path=path,dfname='attributes') 
-  protosave(df=arrive, modelname=modelname, scenario_desc=scenario_desc, run_number=run_number,path=path,dfname='arrive') 
+  
+    protosave(
+      df = varlist,
+      modelname = modelname,
+      scenario_desc = scenario_desc,
+      run_number = run_number,
+      path = path,
+      dfname = 'vars'
+    )
+if (verbose) {
+    protosave(
+      df = resource,
+      modelname = modelname,
+      scenario_desc = scenario_desc,
+      run_number = run_number,
+      path = path,
+      dfname = 'resource'
+    )
+    protosave(
+      df = attributes,
+      modelname = modelname,
+      scenario_desc = scenario_desc,
+      run_number = run_number,
+      path = path,
+      dfname = 'attributes'
+    )
+    protosave(
+      df = arrive,
+      modelname = modelname,
+      scenario_desc = scenario_desc,
+      run_number = run_number,
+      path = path,
+      dfname = 'arrive'
+    )
+  }
+  attributes <- addid(attributes,modelname = modelname,scenario_desc=scenario_desc,run_number = run_number)
+  if(!exists("summary_result")){
+    summary_result <<- get_run_sum(attributes = attributes)
+  } else{
+    summary_result <<- rbind(summary_result,get_run_sum(attributes = attributes))
+  }
 }
 combine_csv <- function(path,target){
   d <- dir(path)

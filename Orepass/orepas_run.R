@@ -9,10 +9,11 @@ stope_access_const = 1
 runduration =  24 * 3600
 loglevel = 0
 reps = 2
-
+verbose=FALSE
 
 
 ## Run the model reps times
+rm(summary_result)
 sens_step=0
 run_id <<- makevalidname(as.character(Sys.time()))
 for(bogger in 5:6) {
@@ -23,19 +24,20 @@ for(bogger in 5:6) {
         modelname = modelname,
         scenario_desc = scenario_desc,
         runduration = runduration ,
-        reps = reps
+        reps = reps,
+        verbose=verbose
       )
     }
   }
 }
 
-
 ## collect results
 seq_path <- paste0(scen_dir,'/',run_id)
 
+write.csv(summary_result,paste0(seq_path,'/_sumresults.csv'))
 
 all_run_vars <- combine_csv(path=seq_path,target='vars')
-summary_stats <- scenario_summary(path=seq_path,target= 'attributes')
+write.csv(all_run_vars,paste0(seq_path,'/_all_run_vars.csv'))
 
 
 
