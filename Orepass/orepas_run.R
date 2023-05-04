@@ -33,7 +33,7 @@ for(n_boggers in 5:6) {
 
 ## collect results
 seq_path <- paste0(scen_dir,'/',run_id)
-
+summary_result[is.na(summary_result)] = 0
 write.csv(summary_result,paste0(seq_path,'/_sumresults.csv'))
 
 all_run_vars <- combine_csv(path=seq_path,target='vars')
