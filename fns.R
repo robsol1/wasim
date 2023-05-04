@@ -359,7 +359,7 @@ run_model <-
         scenario_desc,
         rundir,
         run_number = i,
-        df <- mod_df,
+        df = mod_df,
         resource = get_mon_resources(env),
         attributes = get_mon_attributes(env),
         arrive = get_mon_arrivals(env, per_resource = FALSE),
@@ -459,7 +459,7 @@ if (verbose) {
   if(!exists("summary_result")){
     summary_result <<- get_run_sum(attributes = attributes)
   } else{
-    summary_result <<- rbind(summary_result,get_run_sum(attributes = attributes))
+    summary_result <<- full_join(summary_result,get_run_sum(attributes = attributes))
   }
 }
 combine_csv <- function(path,target){
