@@ -23,6 +23,7 @@ s_wait_upstream_stock <- 4
 s_working <- 5
 s_breakdown <- 6
 s_tramming <- 7
+s_wait_sec_eq <- 8
 
 robs_log <- function(text,pipe=TRUE,level=1,tag="",ret=TRUE){
   if(pipe){pipe <- ' %>% '} else {pipe <- ""}
