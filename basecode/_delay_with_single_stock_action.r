@@ -102,6 +102,7 @@ mod_df <- add_code_row(
   modeldf=mod_df,
   item =item,
   trj_step =trj_step,
+  next_trj_step=next_trj_step,
   activity=activity ,
   stockpile = stockpile,
   secondary_unit_name = secondary_unit_name,

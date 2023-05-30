@@ -15,7 +15,7 @@ source(paste0(basecode,"/_activity_delay.R"))
 source(paste0(basecode,"/_delay_with_single_stock_action.r"))
 source(paste0(basecode,"/_LHD.R"))
 source(paste0(basecode,"/_item_bd_code_generator.R"))
-
+source(paste0(basecode,"/_add_decision_branch.R"))
 s_wait_res <- 1
 s_wait_stock_access <- 2
 s_wait_downstream_stock <- 3
@@ -86,6 +86,7 @@ build_stockpiles <-
         modelname = modeldf$model[1],
         item = '',
         trj_step = 1,
+        next_trj_step = 1,
         activity = '',
         var_txt = paste0(pilename, '_max_stock <- ', maxstocks,"\n",pilename,"_access_limit <- ", access_limit,"\n"),
         trj_txt = "",
@@ -120,6 +121,7 @@ init_model <- function(model,
     modelname = model,
     item = '_activate_model',
     trj_step = 1,
+    next_trj_step = 2,
     activity = '_activate_model',
     var_txt = paste0("env <- simmer('", envname, "' , log_level = ", level, ")\nseed=thisseed\n"),
     # trj_txt = paste0("set.seed(", seed, ")\n"),
@@ -181,6 +183,7 @@ add_trajectory_to_model <-
       modeldf = modeldf,
       item = item,
       trj_step ,
+      next_trj_step=2,
       activity ,
       var_txt ,
       trj_txt ,
@@ -199,6 +202,7 @@ create_close_trj <- function(modelname,modeldf,item){
     modeldf = modeldf,
     item = item,
     trj_step+1 ,
+    next_trj_step=1,
     activity ,
     var_txt ,
     trj_txt ,
@@ -211,6 +215,7 @@ add_code_row <-
            modeldf,
            item,
            trj_step,
+           next_trj_step,
            activity,
            var_txt,
            trj_txt,
@@ -221,6 +226,7 @@ add_code_row <-
       modelname = modelname,
       item = item,
       trj_step = trj_step,
+      next_trj_step = next_trj_step,
       activity = activity,
       var_txt = var_txt,
       trj_txt = trj_txt,
