@@ -101,7 +101,8 @@ mod_df <- add_lhd (
   # haul empty
   haul_empty_resources = n_boggers,
   haul_empty_delay = bogger_haul_empty_delay,
-  trj_step = -1
+  trj_step = -1,
+  next_trj_step = -1
 )
 
 mod_df <- create_close_trj('model',mod_df,'bogger')
@@ -140,7 +141,8 @@ mod_df <- add_lhd (
   # haul empty
   haul_empty_resources = n_trucks,# all trucks can be hauling at the same time
   haul_empty_delay = truck_haul_empty_delay,
-  trj_step = -1
+  trj_step = -1,
+  next_trj_step = -1
 )
 
 mod_df <- create_close_trj(modelname,mod_df,'truck')

@@ -20,7 +20,8 @@ seizeresourceandpaperwork <- "
 #       set_attribute('item_ute_time', function() get_attribute(env, 'item_activity_delay_att'), mod = '+') %>%
 #       set_attribute('item_activity_cap_prod', item_unit_capacity, mod = '+') %>%
 #       ## delayandpaperwork end"
-delayandpaperwork <- "
+delayandpaperwork <- function(next_trj_step){
+  paste0("
       ## delayandpaperwork start
       set_attribute('local_item_activity_status', s_working) %>%
       set_attribute('item_activity_delay_att', item_activity_delay) %>%
@@ -32,11 +33,12 @@ delayandpaperwork <- "
       branch(option = function() ifelse(get_attribute(env, 'item_next_block') < last_block_in_item_trj,1,2),
       continue = c(TRUE, TRUE),
       trajectory('item_activity_set_up_for_next_block') %>%
-        set_attribute('item_next_block', 1, mod = '+'),
+        #set_attribute('item_next_block', 1, mod = '+'),
+        set_attribute('item_next_block',", next_trj_step,"),
       trajectory('item_activity_set_up_for_start') %>%
         set_attribute('item_next_block', 2)
-      )"
-
+      )")
+}
 
 checkatendcode <- "
       ## checkatendcode start
@@ -71,9 +73,13 @@ add_activity_delay <- function(modelname,
                                activity = 'activity_delay',
                                trj_step = -1,
                                number_of_resources = '1',
-                               item_activity_delay = 'function() max(1, rnorm(1, 5, .2))') {
+                               item_activity_delay = 'function() max(1, rnorm(1, 5, .2))',
+                               next_trj_step=-1) {
   if (trj_step < 0) {
     trj_step <- length(which(mod_df$item == item)) + 1
+  }
+  if (next_trj_step < 0) {
+    next_trj_step <- trj_step + 1
   }
   var_txt <- paste0(
     "\nitem_activity_block_id <- ",
@@ -84,7 +90,7 @@ add_activity_delay <- function(modelname,
   trj_txt <-   paste0(
     branch_if_not_activity," %>% ",
     seizeresourceandpaperwork, " %>% ",
-    delayandpaperwork," %>% ",
+    delayandpaperwork(next_trj_step)," %>% ",
     item_breakdown_code(),",",
     #checkatendcode,
    # "\n,",

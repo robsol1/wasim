@@ -11,30 +11,35 @@ add_delay_with_single_stock_movement <- function(modelname,
                                                  item_activity_delay = 'function() max(1, rnorm(1, 5, .2))',
                                                  stockpile,
                                                  secondary_unit_name,
-                                                 secondary_unit_capacity) {
-# set up initial bits of code specific difference between put and get
+                                                 secondary_unit_capacity,
+                                                 next_trj_step = -1) {
+
   if (trj_step < 0) {
     trj_step <- length(which(mod_df$item == item)) + 1
   }
-if (action == 'put') {
-  branch_option = "function() ifelse( stockpile_max_stock - get_global(env, 'stockpile_stocks_val') < item_unit_capacity,1,2)"
-  release_trap = "stock_removed_from_stockpile_signal"
-  log_word = "blocked"
-  anti_word = "starved"
-  move_action <- "'stockpile_stocks_val', item_unit_capacity,mod='+'"
-  check_secondary <- "function() ifelse(get_global(env, 'stockpile_stocks_val') < secondary_unit_name_capacity,1,2)" #send signal if false
-  send_signal <- "stock_added_to_stockpile_signal"
-  noprodstattext <- 's_wait_downstream_stock'
-} else if (action == 'get') {
-  branch_option = "function() ifelse(get_global(env, 'stockpile_stocks_val') < item_unit_capacity,1,2)"
-  release_trap = "stock_added_to_stockpile_signal"
-  log_word = "starved"
-  anti_word = "blocked"
-  move_action <-"'stockpile_stocks_val' , function() get_global(env, 'stockpile_stocks_val')-item_unit_capacity"
-  check_secondary <-"function() ifelse( stockpile_max_stock - get_global(env, 'stockpile_stocks_val') < secondary_unit_name_capacity,1,2)" #send signal if false
-  send_signal <- "stock_removed_from_stockpile_signal"
-  noprodstattext <- 's_wait_upstream_stock'
-}
+  if (next_trj_step < 0) {
+    next_trj_step <- trj_step + 1
+  }
+  # set up initial bits of code specific difference between put and get
+  if (action == 'put') {
+    branch_option = "function() ifelse( stockpile_max_stock - get_global(env, 'stockpile_stocks_val') < item_unit_capacity,1,2)"
+    release_trap = "stock_removed_from_stockpile_signal"
+    log_word = "blocked"
+    anti_word = "starved"
+    move_action <- "'stockpile_stocks_val', item_unit_capacity,mod='+'"
+    check_secondary <- "function() ifelse(get_global(env, 'stockpile_stocks_val') < secondary_unit_name_capacity,1,2)" #send signal if false
+    send_signal <- "stock_added_to_stockpile_signal"
+    noprodstattext <- 's_wait_downstream_stock'
+  } else if (action == 'get') {
+    branch_option = "function() ifelse(get_global(env, 'stockpile_stocks_val') < item_unit_capacity,1,2)"
+    release_trap = "stock_added_to_stockpile_signal"
+    log_word = "starved"
+    anti_word = "blocked"
+    move_action <-"'stockpile_stocks_val' , function() get_global(env, 'stockpile_stocks_val')-item_unit_capacity"
+    check_secondary <-"function() ifelse( stockpile_max_stock - get_global(env, 'stockpile_stocks_val') < secondary_unit_name_capacity,1,2)" #send signal if false
+    send_signal <- "stock_removed_from_stockpile_signal"
+    noprodstattext <- 's_wait_upstream_stock'
+  }
   
 
 trj_txt <- paste0("
@@ -56,7 +61,7 @@ seizeresourceandpaperwork," %>% ","
         trajectory('have_stocks_so_do_work') %>% 
           ",robs_log('adjusting stocks prior to delay'),"
            set_global(",move_action,") %>%
-      ",delayandpaperwork," %>% 
+      ",delayandpaperwork(next_trj_step)," %>% 
         # specific code for get_put
         release('stockpile_access') %>% ",
         item_breakdown_code()," %>% 

@@ -23,7 +23,9 @@ add_lhd <- function(modelname,
                     # haul empty Vars
                     haul_empty_resources,
                     haul_empty_delay,
-                    trj_step = -1) {
+                    trj_step = -1,
+                    next_trj_step = -1
+                    ) {
   mod_df <- add_delay_with_single_stock_movement(
     modelname = modelname,
     mod_df = mod_df,
@@ -67,7 +69,8 @@ add_lhd <- function(modelname,
     item = item,
     activity = 'haul_empty',
     number_of_resources = haul_empty_resources,
-    item_activity_delay = haul_empty_delay
+    item_activity_delay = haul_empty_delay,
+    next_trj_step=next_trj_step
   )
   
 }
