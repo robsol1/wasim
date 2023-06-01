@@ -11,15 +11,6 @@ seizeresourceandpaperwork <- "
       set_attribute('item_activity_success', 0) %>%
       set_attribute('local_item_activity_status', s_wait_res) %>%
       seize('item_activity_resource', 1)"
-# delayandpaperwork <- "
-#       ## delayandpaperwork start
-#       set_attribute('local_item_activity_status', s_working) %>%
-#       set_attribute('item_activity_delay_att', item_activity_delay) %>%
-#       timeout_from_attribute('item_activity_delay_att') %>%
-#       set_attribute('item_activity_success', 1) %>%
-#       set_attribute('item_ute_time', function() get_attribute(env, 'item_activity_delay_att'), mod = '+') %>%
-#       set_attribute('item_activity_cap_prod', item_unit_capacity, mod = '+') %>%
-#       ## delayandpaperwork end"
 delayandpaperwork <- function(next_trj_step){
   paste0("
       ## delayandpaperwork start
@@ -33,7 +24,6 @@ delayandpaperwork <- function(next_trj_step){
       branch(option = function() ifelse(get_attribute(env, 'item_next_block') < last_block_in_item_trj,1,2),
       continue = c(TRUE, TRUE),
       trajectory('item_activity_set_up_for_next_block') %>%
-        #set_attribute('item_next_block', 1, mod = '+'),
         set_attribute('item_next_block',", next_trj_step,"),
       trajectory('item_activity_set_up_for_start') %>%
         set_attribute('item_next_block', 2)
@@ -63,7 +53,8 @@ skipedblock <- "
     #skipedblock start 
     trajectory('item_activity_skip_this_block') %>%
       log_('item:activity:Block id is not next block so skip block',level=1)
-  )
+  )%>% 
+  log_('item:activity:End and go to next block',level=1)
   #skipedblock end"
 
 

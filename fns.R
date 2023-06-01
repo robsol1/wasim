@@ -5,6 +5,7 @@
 
 
 library(simmer)
+library(simmer.plot)
 library(tidyverse)
 library(data.table)
 library(ggplot2)
@@ -16,6 +17,8 @@ source(paste0(basecode,"/_delay_with_single_stock_action.r"))
 source(paste0(basecode,"/_LHD.R"))
 source(paste0(basecode,"/_item_bd_code_generator.R"))
 source(paste0(basecode,"/_add_decision_branch.R"))
+source(paste0(basecode,"/_target_seek_load_by_item.R"))
+source(paste0(basecode,"/_loader_loads_item.R"))
 s_wait_res <- 1
 s_wait_stock_access <- 2
 s_wait_downstream_stock <- 3

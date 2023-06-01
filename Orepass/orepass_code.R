@@ -1,10 +1,11 @@
 env <- simmer('env' , log_level = 0)
+seed=thisseed
 
 drawpoint_max_stock <- 9999999
 drawpoint_access_limit <- 3
 
 stope_stock_max_stock <- 1000
-stope_stock_access_limit <- 2
+stope_stock_access_limit <- 1
 
 hoist_stock_max_stock <- 9999999
 hoist_stock_access_limit <- 1
@@ -107,7 +108,8 @@ bogger_trj <- bogger_trj %>%
       branch(option = function() ifelse(get_attribute(env, 'bogger_next_block') < last_block_in_bogger_trj,1,2),
       continue = c(TRUE, TRUE),
       trajectory('bogger_get_stocks_set_up_for_next_block') %>%
-        set_attribute('bogger_next_block', 1, mod = '+'),
+        #set_attribute('bogger_next_block', 1, mod = '+'),
+        set_attribute('bogger_next_block',3),
       trajectory('bogger_get_stocks_set_up_for_start') %>%
         set_attribute('bogger_next_block', 2)
       ) %>% 
@@ -173,7 +175,8 @@ bogger_trj <- bogger_trj %>%
       branch(option = function() ifelse(get_attribute(env, 'bogger_next_block') < last_block_in_bogger_trj,1,2),
       continue = c(TRUE, TRUE),
       trajectory('bogger_haul_loaded_set_up_for_next_block') %>%
-        set_attribute('bogger_next_block', 1, mod = '+'),
+        #set_attribute('bogger_next_block', 1, mod = '+'),
+        set_attribute('bogger_next_block',4),
       trajectory('bogger_haul_loaded_set_up_for_start') %>%
         set_attribute('bogger_next_block', 2)
       ) %>% 
@@ -243,7 +246,8 @@ bogger_trj <- bogger_trj %>%
       branch(option = function() ifelse(get_attribute(env, 'bogger_next_block') < last_block_in_bogger_trj,1,2),
       continue = c(TRUE, TRUE),
       trajectory('bogger_dump_stocks_set_up_for_next_block') %>%
-        set_attribute('bogger_next_block', 1, mod = '+'),
+        #set_attribute('bogger_next_block', 1, mod = '+'),
+        set_attribute('bogger_next_block',5),
       trajectory('bogger_dump_stocks_set_up_for_start') %>%
         set_attribute('bogger_next_block', 2)
       ) %>% 
@@ -309,7 +313,8 @@ bogger_trj <- bogger_trj %>%
       branch(option = function() ifelse(get_attribute(env, 'bogger_next_block') < last_block_in_bogger_trj,1,2),
       continue = c(TRUE, TRUE),
       trajectory('bogger_haul_empty_set_up_for_next_block') %>%
-        set_attribute('bogger_next_block', 1, mod = '+'),
+        #set_attribute('bogger_next_block', 1, mod = '+'),
+        set_attribute('bogger_next_block',100),
       trajectory('bogger_haul_empty_set_up_for_start') %>%
         set_attribute('bogger_next_block', 2)
       ) %>% 
@@ -390,7 +395,8 @@ truck_trj <- truck_trj %>%
       branch(option = function() ifelse(get_attribute(env, 'truck_next_block') < last_block_in_truck_trj,1,2),
       continue = c(TRUE, TRUE),
       trajectory('truck_get_stocks_set_up_for_next_block') %>%
-        set_attribute('truck_next_block', 1, mod = '+'),
+        #set_attribute('truck_next_block', 1, mod = '+'),
+        set_attribute('truck_next_block',3),
       trajectory('truck_get_stocks_set_up_for_start') %>%
         set_attribute('truck_next_block', 2)
       ) %>% 
@@ -456,7 +462,8 @@ truck_trj <- truck_trj %>%
       branch(option = function() ifelse(get_attribute(env, 'truck_next_block') < last_block_in_truck_trj,1,2),
       continue = c(TRUE, TRUE),
       trajectory('truck_haul_loaded_set_up_for_next_block') %>%
-        set_attribute('truck_next_block', 1, mod = '+'),
+        #set_attribute('truck_next_block', 1, mod = '+'),
+        set_attribute('truck_next_block',4),
       trajectory('truck_haul_loaded_set_up_for_start') %>%
         set_attribute('truck_next_block', 2)
       ) %>% 
@@ -526,7 +533,8 @@ truck_trj <- truck_trj %>%
       branch(option = function() ifelse(get_attribute(env, 'truck_next_block') < last_block_in_truck_trj,1,2),
       continue = c(TRUE, TRUE),
       trajectory('truck_dump_stocks_set_up_for_next_block') %>%
-        set_attribute('truck_next_block', 1, mod = '+'),
+        #set_attribute('truck_next_block', 1, mod = '+'),
+        set_attribute('truck_next_block',5),
       trajectory('truck_dump_stocks_set_up_for_start') %>%
         set_attribute('truck_next_block', 2)
       ) %>% 
@@ -592,7 +600,8 @@ truck_trj <- truck_trj %>%
       branch(option = function() ifelse(get_attribute(env, 'truck_next_block') < last_block_in_truck_trj,1,2),
       continue = c(TRUE, TRUE),
       trajectory('truck_haul_empty_set_up_for_next_block') %>%
-        set_attribute('truck_next_block', 1, mod = '+'),
+        #set_attribute('truck_next_block', 1, mod = '+'),
+        set_attribute('truck_next_block',6),
       trajectory('truck_haul_empty_set_up_for_start') %>%
         set_attribute('truck_next_block', 2)
       ) %>% 
@@ -630,7 +639,7 @@ truck_trj <- truck_trj %>%
 
 env <-  env  %>%
   add_global('stope_stock_stocks_val',500) %>%
-  add_resource('stope_stock_access', 2,preemptive = TRUE,preempt_order = 'fifo')
+  add_resource('stope_stock_access', 1,preemptive = TRUE,preempt_order = 'fifo')
   
 
 env <-  env  %>%
@@ -639,36 +648,36 @@ env <-  env  %>%
   
 
 env <- env %>%
-	add_generator('bogger', trajectory = bogger_trj, at((1:15)), mon = 2)
+	add_generator('bogger', trajectory = bogger_trj, at((1:6)), mon = 2)
 
 
 
 ## env for bogger get_stocks
   env <- env %>%
     add_global('bogger_get_stocks_count',0) %>%
-    add_resource('bogger_get_stocks_resource', 15,preemptive = TRUE,preempt_order = 'fifo')
+    add_resource('bogger_get_stocks_resource', 6,preemptive = TRUE,preempt_order = 'fifo')
   
 
 
 ## env for bogger haul_loaded
 env <- env %>%
-add_resource('bogger_haul_loaded_resource', 15,preemptive = TRUE,preempt_order = 'fifo')
+add_resource('bogger_haul_loaded_resource', 6,preemptive = TRUE,preempt_order = 'fifo')
 
 
 
 ## env for bogger dump_stocks
   env <- env %>%
     add_global('bogger_dump_stocks_count',0) %>%
-    add_resource('bogger_dump_stocks_resource', 15,preemptive = TRUE,preempt_order = 'fifo')
+    add_resource('bogger_dump_stocks_resource', 6,preemptive = TRUE,preempt_order = 'fifo')
   
 
 
 ## env for bogger haul_empty
 env <- env %>%
-add_resource('bogger_haul_empty_resource', 15,preemptive = TRUE,preempt_order = 'fifo')
+add_resource('bogger_haul_empty_resource', 6,preemptive = TRUE,preempt_order = 'fifo')
 
 env <- env %>%
-	add_generator('truck', trajectory = truck_trj, at((1:6)), mon = 2)
+	add_generator('truck', trajectory = truck_trj, at((1:15)), mon = 2)
 
 
 
@@ -681,7 +690,7 @@ env <- env %>%
 
 ## env for truck haul_loaded
 env <- env %>%
-add_resource('truck_haul_loaded_resource', 6,preemptive = TRUE,preempt_order = 'fifo')
+add_resource('truck_haul_loaded_resource', 15,preemptive = TRUE,preempt_order = 'fifo')
 
 
 
@@ -694,5 +703,5 @@ add_resource('truck_haul_loaded_resource', 6,preemptive = TRUE,preempt_order = '
 
 ## env for truck haul_empty
 env <- env %>%
-add_resource('truck_haul_empty_resource', 6,preemptive = TRUE,preempt_order = 'fifo')
+add_resource('truck_haul_empty_resource', 15,preemptive = TRUE,preempt_order = 'fifo')
 
