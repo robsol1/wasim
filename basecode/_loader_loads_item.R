@@ -19,7 +19,7 @@ add_loader_loads_item<- function(modelname,
     next_trj_step <- trj_step + 1
   }
 trj_txt <- paste0("
-item_trj <- trajectory() %>% 
+item_trj <- item_trj %>%
   branch(option = function()ifelse(get_attribute(env, 'item_next_block') == item_activity_block_id,1,2),
          continue = c(TRUE, TRUE),
          trajectory('item_activity_stay_in_block') %>% 
@@ -29,7 +29,7 @@ item_trj <- trajectory() %>%
            branch( option = function() ifelse(get_global(env, 'stockpile_stocks_val') > item_unit_capacity,1,2),
                    continue=c(TRUE,TRUE),
                    trajectory('item_activity_have_stocks') %>% 
-                     branch( option = function() ifelse(get_global(env, 'item_activity_waiting_load_item_name') > 0,1,2),
+                     branch( option = function() ifelse(get_global(env, 'secondary_unit_name_activity_waiting_item') > 0,1,2),
                              continue=c(TRUE,TRUE),
                              trajectory('item_activity_truck_needs_loading') %>% 
                                set_attribute('local_item_activity_status', s_working) %>%
@@ -52,6 +52,7 @@ item_trj <- trajectory() %>%
          trajectory('item_activity_skip_this_block') %>% 
            ",robs_log('Block id is not next block so skip block',ret=FALSE,pipe=FALSE),"
   ) %>% 
+  set_attribute('item_next_block',", next_trj_step,") %>% 
   ",robs_log('End and go to next block',ret=FALSE,pipe=FALSE),"
 ")
            

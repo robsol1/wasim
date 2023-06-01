@@ -4,13 +4,13 @@ modelname="orepasswithsharedlhd"
 loglevel=1
 
 truck_unit_capacity=70
-n_trucks=5
+n_trucks=1
 truck_mttr=1
 truck_mtbf=1
 truck_loading_delay=5
 
 LHD_unit_capacity=20
-n_LHD=5
+n_LHD=1
 LHD_mttr=1
 LHD_mtbf=1
 
@@ -27,25 +27,31 @@ access_limit=c(3,stope_access_const,1) # number of activities that can operate o
 mod_df <- init_model(model=modelname,level = loglevel)
 
 mod_df <- build_stockpiles(mod_df,pilenames=pilenames,maxstocks=maxstocks,initstocks=initstocks,access_limit)
-# mod_df <- add_trajectory_to_model(modelname=modelname,
-#                                   modeldf = mod_df,
-#                                   item = 'truck',
-#                                   actvity ='add_truck_trj',
-#                                   n_items = n_trucks,
-#                                   item_unit_capacity = truck_unit_capacity,
-#                                   item_mttr=truck_mttr,
-#                                   item_mtbf=truck_mtbf)
-# 
-# mod_df <- add_target_seek_load_by_item(modelname=modelname,
-#                                   mod_df = mod_df,
-#                                   item = 'truck',
-#                                   activity = 'truckloadedbybogger',
-#                                   trj_step = -1,
-#                                   number_of_resources = '1',
-#                                   item_activity_delay = 'function() max(1, rnorm(1, 5, .2))',
-#                                   stockpile='stope_stock',
-#                                   load_item_name='bogger',
-#                                   next_trj_step = -1)
+mod_df <- add_trajectory_to_model(modelname=modelname,
+                                  modeldf = mod_df,
+                                  item = 'truck',
+                                  actvity ='add_truck_trj',
+                                  n_items = n_trucks,
+                                  item_unit_capacity = truck_unit_capacity,
+                                  item_mttr=truck_mttr,
+                                  item_mtbf=truck_mtbf)
+
+mod_df <- add_target_seek_load_by_item(modelname=modelname,
+                                  mod_df = mod_df,
+                                  item = 'truck',
+                                  activity = 'loading',
+                                  trj_step = -1,
+                                  number_of_resources = '1',
+                                  item_activity_delay = 'function() max(1, rnorm(1, 5, .2))',
+                                  stockpile='stope_stock',
+                                  secondary_unit_name='LHD',
+                                  next_trj_step = -1)
+mod_df <- create_close_trj(modelname,mod_df,'truck')
+
+
+
+
+
 
 mod_df <- add_trajectory_to_model(modelname=modelname,
                                   modeldf = mod_df,
@@ -71,7 +77,7 @@ mod_df <- add_loader_loads_item(
 
 
 
-mod_df <- create_close_trj(modelname,mod_df,'truck')
+mod_df <- create_close_trj(modelname,mod_df,'LHD')
 code <- join_code(mod_df)
 
 save_text_to_file(code,"temp2.R")

@@ -9,7 +9,7 @@ add_target_seek_load_by_item<- function(modelname,
                                                  number_of_resources = '1',
                                                  item_activity_delay = 'function() max(1, rnorm(1, 5, .2))',
                                                  stockpile,
-                                                 load_item_name,
+                                                 secondary_unit_name,
                                                  next_trj_step = -1) {
 
   if (trj_step < 0) {
@@ -41,11 +41,11 @@ trj_txt <- paste0("
                      ",robs_log("continuing from constrained stocks",pipe=FALSE,ret=FALSE),",
                    trajectory('have_stocks_so_do_work') %>% 
                      set_attribute('local_item_activity_status', s_wait_sec_eq) %>%
-                     set_global('item_activity_waiting_load_item_name',1,mod='+') %>% 
+                     set_global('item_activity_waiting_secondary_unit_name',1,mod='+') %>% 
                      trap('secondary_unit_name_available') %>% 
                      ",robs_log('waiting for loader',ret=FALSE),"
                      wait() %>% 
-                     set_global('item_activity_waiting_load_item_name',-1,mod='+') %>% 
+                     set_global('item_activity_waiting_secondary_unit_name',-1,mod='+') %>% 
                      set_attribute('local_item_activity_status', s_working) %>%
                      set_attribute('item_get_load_time_start',  function() simmer::now(env)) %>%
                      trap('wait_complete_load') %>% 
@@ -83,6 +83,7 @@ env_txt = paste0(
   "\n\n## env for item activity
   env <- env %>%
     add_global('item_activity_count',0) %>%
+    add_global('item_activity_waiting_secondary_unit_name',0) %>% 
     add_resource('",paste0("item_activity_",trj_step,"_res'"),",1,preemptive = TRUE,preempt_order = 'fifo')
   "
 )
@@ -94,7 +95,7 @@ mod_df <- add_code_row(
   next_trj_step=next_trj_step,
   activity=activity ,
   stockpile = stockpile,
-  #secondary_unit_name = secondary_unit_name,
+  secondary_unit_name = secondary_unit_name,
   var_txt=var_txt ,
   trj_txt=trj_txt ,
   env_txt=env_txt
