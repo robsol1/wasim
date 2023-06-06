@@ -14,6 +14,7 @@ seizeresourceandpaperwork <- "
 delayandpaperwork <- function(next_trj_step){
   paste0("
       ## delayandpaperwork start
+      ",robs_log('start activity delay',ret=FALSE)," 
       set_attribute('local_item_activity_status', s_working) %>%
       set_attribute('item_activity_delay_att', item_activity_delay) %>%
       timeout_from_attribute('item_activity_delay_att') %>%

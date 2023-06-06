@@ -19,6 +19,7 @@ source(paste0(basecode,"/_item_bd_code_generator.R"))
 source(paste0(basecode,"/_add_decision_branch.R"))
 source(paste0(basecode,"/_target_seek_load_by_item.R"))
 source(paste0(basecode,"/_loader_loads_item.R"))
+source(paste0(basecode,"/_sched_branch.R"))
 s_wait_res <- 1
 s_wait_stock_access <- 2
 s_wait_downstream_stock <- 3
@@ -27,6 +28,22 @@ s_working <- 5
 s_breakdown <- 6
 s_tramming <- 7
 s_wait_sec_eq <- 8
+
+huge=999999999
+tiny=0.00000001
+
+
+trimrandom <-
+  function(val,
+           fn = rnorm,
+           varfrac = 0.1,
+           min = tiny,
+           max = huge,
+           nvars = 1) {
+    min(max(min, fn(nvars, val, val * varfrac))
+        , huge)
+  }
+
 
 robs_log <- function(text,pipe=TRUE,level=1,tag="",ret=TRUE){
   if(pipe){pipe <- ' %>% '} else {pipe <- ""}
@@ -100,7 +117,7 @@ build_stockpiles <-
   \n")
         
       ) %>%
-      select(-pilename, -maxstocks, -initstocks)
+      dplyr::select(-pilename, -maxstocks, -initstocks)
     
     modeldf = rbind(modeldf, df)
     
@@ -196,6 +213,7 @@ add_trajectory_to_model <-
   }
 create_close_trj <- function(modelname,modeldf,item){
   trj_txt <-  "item_trj <- item_trj %>% 
+  set_attribute('item_next_block',2) %>% 
   simmer::rollback(target = 'item_rollback_to_start')"
   env_txt=""
   trj_step <- length(which(modeldf$item == item))
@@ -226,11 +244,21 @@ add_code_row <-
            env_txt,
            stockpile = NULL,
            secondary_unit_name = NULL) {
+    # sometimes next_trj_step is a vector so need to convert to a atomic character variable
+    if (length(next_trj_step) > 1) {
+      next_trj_step_txt <- next_trj_step[1]
+      for (i in 2:length(next_trj_step)) {
+        next_trj_step_txt <-
+          paste0(next_trj_step_txt, ",", next_trj_step[i])
+      }
+    } else {
+      next_trj_step_txt <- as.character(next_trj_step)
+    }
     df = data.frame(
       modelname = modelname,
       item = item,
       trj_step = trj_step,
-      next_trj_step = next_trj_step,
+      next_trj_step = next_trj_step_txt,
       activity = activity,
       var_txt = var_txt,
       trj_txt = trj_txt,

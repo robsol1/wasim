@@ -1,6 +1,28 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-06-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r }
 source("fns.R")
 
-modelname="orepasswithsharedlhd"
+```
+
+
+
+```{r }
+modelname="no_orepass"
 loglevel=1
 
 #unit sizes
@@ -37,6 +59,9 @@ initstocks=c(drawpoint_stocks_max,stope_stocks_max/2,0)
 access_limit=c(3,stope_access_const,1) # number of activities that can operate on pile at any one time
 
 
+```
+
+```{r}
 ###
 ### build Code
 mod_df <- init_model(model=modelname,level = loglevel)
@@ -52,7 +77,112 @@ mod_df <-
     access_limit=access_limit
   )
 
+```
+```{r}
+item <- "LHD"
 
+
+mod_df <- add_trajectory_to_model(modelname=modelname,
+                                  modeldf = mod_df,
+                                  item = item,
+                                  actvity ='add_LHD_trj',
+                                  n_items = n_LHD,
+                                  item_unit_capacity = LHD_unit_capacity,
+                                  item_mttr=LHD_mttr,
+                                  item_mtbf=LHD_mtbf)
+
+
+mod_df <-  add_schedule_branch(modelname,
+                                mod_df,
+                                item,
+                                activity = 'sched_branch',
+                                trj_step = -1,
+                                sched_name = "schedule_loader",
+                                next_trj_step = c(1, 2, 3),
+                                continue = c(TRUE, TRUE, TRUE))
+mod_df <- add_loader_loads_item(modelname=modelname,
+                                mod_df= mod_df,
+                                item=item,
+                                activity = 'loading',
+                                trj_step = -1,
+                                number_of_resources = n_LHD,
+                                item_activity_delay = truck_loading_delay,
+                                stockpile='stope_stock',
+                                secondary_unit_name='truck',
+                                next_trj_step = -1)
+
+mod_df <- add_activity_delay(modelname=modelname,
+                             mod_df=mod_df,
+                             item=item,
+                             activity = 'travel_empty',
+                             trj_step = -1,
+                             number_of_resources = n_LHD,
+                             item_activity_delay = LHD_travel_empty_delay,
+                             next_trj_step=-1)
+mod_df <- create_close_trj(modelname=modelname,
+                           modeldf = mod_df,
+                           item)
+```
+```{r}
+
+code <- join_code(mod_df)
+path <- paste0(modelname,"/",modelname,"_code.R")
+save_text_to_file(code,path)
+thisseed=2
+source(path)
+logfile <- paste0(modelname,"/",modelname,"_log.log")
+
+
+
+
+```
+
+
+```{r}
+
+)
+mod_df <-  add_delay_with_single_stock_movement(modelname=modelname,
+                                                mod_df=mod_df,
+                                                item=item,
+                                                activity = 'load_from_drawpoint',
+                                                action='put',
+                                                trj_step = -1,
+                                                number_of_resources = 1,
+                                                item_activity_delay = LHD_loading_delay,
+                                                stockpile='hoist_stock',
+                                                secondary_unit_name='hoist',
+                                                secondary_unit_capacity=hoist_nominal_size,
+                                                next_trj_step = -1)
+
+mod_df <- add_activity_delay(modelname=modelname,
+                             mod_df=mod_df,
+                             item=item,
+                             activity = 'travel_loaded',
+                             trj_step = -1,
+                             number_of_resources = n_LHD,
+                             item_activity_delay = LHD_travel_loaded_delay,
+                             next_trj_step=-1)
+mod_df <-  add_delay_with_single_stock_movement(modelname=modelname,
+                                                mod_df=mod_df,
+                                                item=item,
+                                                activity = 'dump_2_Stopestock',
+                                                action='put',
+                                                trj_step = -1,
+                                                number_of_resources = 1,
+                                                item_activity_delay = LHD_dump_delay,
+                                                stockpile='stope_stock',
+                                                secondary_unit_name='truck',
+                                                secondary_unit_capacity=truck_load_size,
+                                                next_trj_step = -1)
+
+
+                             next_trj_step=-1)
+
+
+
+```
+
+```{r add_truck}
 ## add truck trajectory to model
 item='truck'
 mod_df <- add_trajectory_to_model(modelname=modelname,
@@ -109,88 +239,14 @@ mod_df <- add_activity_delay(modelname=modelname,
 mod_df <- create_close_trj(modelname=modelname,
                            modeldf = mod_df,
                            item)
+```
 
+```{r run}
 
-
-item <- "LHD"
-
-
-mod_df <- add_trajectory_to_model(modelname=modelname,
-                                  modeldf = mod_df,
-                                  item = item,
-                                  actvity ='add_LHD_trj',
-                                  n_items = n_LHD,
-                                  item_unit_capacity = LHD_unit_capacity,
-                                  item_mttr=LHD_mttr,
-                                  item_mtbf=LHD_mtbf)
-mod_df <-  add_delay_with_single_stock_movement(modelname=modelname,
-                                                mod_df=mod_df,
-                                                item=item,
-                                                activity = 'load_from_drawpoint',
-                                                action='put',
-                                                trj_step = -1,
-                                                number_of_resources = 1,
-                                                item_activity_delay = LHD_loading_delay,
-                                                stockpile='hoist_stock',
-                                                secondary_unit_name='hoist',
-                                                secondary_unit_capacity=hoist_nominal_size,
-                                                next_trj_step = -1)
-mod_df <- add_activity_delay(modelname=modelname,
-                             mod_df=mod_df,
-                             item=item,
-                             activity = 'travel_loaded',
-                             trj_step = -1,
-                             number_of_resources = n_LHD,
-                             item_activity_delay = LHD_travel_loaded_delay,
-                             next_trj_step=-1)
-mod_df <-  add_delay_with_single_stock_movement(modelname=modelname,
-                                                mod_df=mod_df,
-                                                item=item,
-                                                activity = 'dump_2_Stopestock',
-                                                action='put',
-                                                trj_step = -1,
-                                                number_of_resources = 1,
-                                                item_activity_delay = LHD_dump_delay,
-                                                stockpile='stope_stock',
-                                                secondary_unit_name='truck',
-                                                secondary_unit_capacity=truck_load_size,
-                                                next_trj_step = -1)
-mod_df <- add_loader_loads_item(modelname=modelname,
-                                  mod_df= mod_df,
-                                  item=item,
-                                  activity = 'loading',
-                                  trj_step = -1,
-                                  number_of_resources = n_LHD,
-                                  item_activity_delay = truck_loading_delay,
-                                  stockpile='stope_stock',
-                                  secondary_unit_name='truck',
-                                  next_trj_step = -1
-                                )
-mod_df <- add_activity_delay(modelname=modelname,
-                             mod_df=mod_df,
-                             item=item,
-                             activity = 'travel_empty',
-                             trj_step = -1,
-                             number_of_resources = n_LHD,
-                             item_activity_delay = LHD_travel_empty_delay,
-                             next_trj_step=-1)
-
-
-mod_df <- create_close_trj(modelname=modelname,
-                           modeldf = mod_df,
-                           item)
-
-code <- join_code(mod_df)
-path <- paste0(modelname,"/",modelname,"_code.R")
-save_text_to_file(code,path)
-
-
-logfile <- paste0(modelname,"/",modelname,"_log.log")
 con <- file(logfile)
 sink(con, append=TRUE)
 sink(con, append=TRUE, type="message")
-thisseed=2
-source(path)
+
 env <- env %>% run(10000)
 sink(type = "message")
 sink() 
@@ -218,3 +274,7 @@ pltdata %>% ggplot(aes(x=time,y=value)) +
 get_palette <- scales::brewer_pal(type = "qual", palette = 1)
 plot(truck_trj, fill = get_palette,height=3000)
 plot(LHD_trj, fill = get_palette,height=3000)
+
+
+```
+

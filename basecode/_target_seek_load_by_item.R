@@ -45,26 +45,23 @@ trj_txt <- paste0("
                      trap('secondary_unit_name_available') %>% 
                      ",robs_log('waiting for loader',ret=FALSE),"
                      wait() %>% 
+                     set_attribute('start_load', function() simmer::now(env)) %>%
                      set_global('item_activity_waiting_secondary_unit_name',-1,mod='+') %>% 
                      set_attribute('local_item_activity_status', s_working) %>%
                      set_attribute('item_get_load_time_start',  function() simmer::now(env)) %>%
-                     trap('wait_complete_load') %>% 
+                     trap('wait_complete_load_secondary_unit_name') %>% 
                      ",robs_log('wait while loading',ret=FALSE)," 
                      wait() %>%
+                     ",robs_log('released from loading',ret=FALSE)," 
+                     set_attribute('end_load', function() simmer::now(env)) %>% 
+                     set_attribute('item_activity_delay_att',function() simmer::now(env)-get_attribute(env,'start_load')) %>% 
                      set_attribute('item_activity_success', 1) %>%
                      set_attribute('item_ute_time', function() get_attribute(env, 'item_activity_delay_att'), mod = '+') %>%
                      set_attribute('item_activity_cap_prod', item_unit_capacity, mod = '+') %>%
                      release('",paste0('item_activity_',trj_step,'_res'),"') %>% 
-                     # branch(option = function() ifelse(get_attribute(env, 'item_next_block') < last_block_in_item_trj,1,2),
-                     #        continue = c(TRUE, TRUE),
-                     #        trajectory('item_activity_set_up_for_next_block') %>%
-                     #          set_attribute('item_next_block',", next_trj_step,"),
-                     #        trajectory('item_activity_set_up_for_start') %>%
-                     #          set_attribute('item_next_block', 2)
-                     # )
                      set_attribute('item_next_block',", next_trj_step,")
                   ) %>% " ,
-        item_breakdown_code()," ,
+                  item_breakdown_code()," ,
          trajectory('item_activity_skip_this_block') %>%
            log_('item:activity:Block id is not next block so skip block',level=1)
          )%>% 

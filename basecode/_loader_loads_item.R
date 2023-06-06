@@ -25,29 +25,40 @@ item_trj <- item_trj %>%
          trajectory('item_activity_stay_in_block') %>% 
            set_attribute('item_activity_success', 0) %>%
            set_attribute('local_item_activity_status', s_wait_stock_access) %>%
+           ",robs_log('Wait stockpile access',ret=FALSE,pipe=TRUE),"
            seize('stockpile_access') %>% 
+           ",robs_log('got stockpile access',ret=FALSE,pipe=TRUE),"
            branch( option = function() ifelse(get_global(env, 'stockpile_stocks_val') > item_unit_capacity,1,2),
                    continue=c(TRUE,TRUE),
                    trajectory('item_activity_have_stocks') %>% 
                      branch( option = function() ifelse(get_global(env, 'secondary_unit_name_activity_waiting_item') > 0,1,2),
                              continue=c(TRUE,TRUE),
                              trajectory('item_activity_truck_needs_loading') %>% 
+                               ",robs_log('has stock and truck waiting',ret=FALSE,pipe=TRUE),"
                                set_attribute('local_item_activity_status', s_working) %>%
-                               send('item_name_available') %>%  # send signal to move truck into loading state
+                               ",robs_log('sending signal',ret=FALSE,pipe=TRUE),"
+                               send('item_available') %>%  # send signal to move truck into loading state
+                               ",robs_log('signal sent',ret=FALSE,pipe=TRUE),"
                                set_attribute('item_activity_haul_loaded_status', s_working) %>%
                                set_attribute('item_activity_loaded_delay_att', secondary_unit_name_activity_delay) %>%
                                timeout_from_attribute('item_activity_loaded_delay_att') %>%
                                set_attribute('item_activity_loaded_success', 1) %>%
-                               set_attribute('item_ute_time', function() get_attribute(env, 'item_delay_att'), mod = '+') %>%
+                               set_attribute('item_ute_time', function() get_attribute(env, 'item_activity_loaded_delay_att'), mod = '+') %>%
                                set_attribute('item_activity_loaded_cap_prod', secondary_unit_name_unit_capacity, mod = '+') %>% 
+                               ",robs_log('sending signal to complete loading',ret=FALSE,pipe=TRUE),"
+                               send('wait_complete_load_item') %>% 
+                               ",robs_log('signal sent',ret=FALSE,pipe=TRUE),"
+                               ",robs_log('release stockpile access',ret=FALSE,pipe=TRUE),"
                                release('stockpile_access') %>% ",
                                item_breakdown_code(),", 
                              trajectory('item_activity_no_truck_required') %>% 
+                               release('stockpile_access') %>% 
                                ",robs_log('no_truck_required',ret=FALSE,pipe=FALSE),"
                      ),
-                   trajectory('item_activity_insufficient_stocks') %>% 
+                   trajectory('item_activity_insufficient_stocks') %>%
+                   release('stockpile_access') %>% 
                      ",robs_log('insufficient stocks',ret=FALSE,pipe=FALSE),"
-           )
+           ) 
            ,
          trajectory('item_activity_skip_this_block') %>% 
            ",robs_log('Block id is not next block so skip block',ret=FALSE,pipe=FALSE),"
